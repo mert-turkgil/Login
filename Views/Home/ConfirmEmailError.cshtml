@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Email Confirmation Failed";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white text-center">
+                    <h3 class="card-title mb-0">Email Confirmation Failed</h3>
+                </div>
+                <div class="card-body text-center">
+                    <p class="lead">Oops! Something went wrong while confirming your email.</p>
+                    <p>@ViewBag.ErrorMessage</p>
+                    <p>Please check the confirmation link or contact support if the issue persists.</p>
+                    <a href="/" class="btn btn-secondary btn-lg mt-3">
+                        <i class="fas fa-home"></i> Return to Homepage
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

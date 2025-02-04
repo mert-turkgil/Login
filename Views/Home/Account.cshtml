@@ -1,0 +1,57 @@
+@using Login.Identity
+@inject RoleManager<IdentityRole> _roleManager
+@inject UserManager<User> _userManager
+@model Login.Identity.User
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0"><i class="fas fa-user-circle"></i> Account Details</h3>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Full Name:</dt>
+                        <dd class="col-sm-9">@(Model?.FirstName ?? "N/A") @(Model?.LastName ?? "N/A")</dd>
+
+                        <dt class="col-sm-3">Email:</dt>
+                        <dd class="col-sm-9">@(Model?.Email ?? "N/A")</dd>
+
+                        <dt class="col-sm-3">Account Created:</dt>
+                        <dd class="col-sm-9">@(Model?.CreatedDate.ToString("MMMM dd, yyyy") ?? "N/A")</dd>
+
+                        <dt class="col-sm-3">User Name:</dt>
+                        <dd class="col-sm-9">@(Model?.UserName ?? "N/A")</dd>
+
+                        <dt class="col-sm-3">Role Name:</dt>
+                        <dd class="col-sm-9">
+                            @{
+                                var userRoles = await _userManager.GetRolesAsync(Model);
+                                if (userRoles != null && userRoles.Any())
+                                {
+                                    <ul>
+                                        @foreach (var role in userRoles)
+                                        {
+                                            <li>@role</li>
+                                        }
+                                    </ul>
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+                            }
+                        </dd>
+                    </dl>
+
+                    <div class="text-center mt-4">
+                        <form asp-action="Logout" method="post">
+                            <button type="submit" class="btn btn-danger btn-lg"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
