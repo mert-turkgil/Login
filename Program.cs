@@ -87,9 +87,9 @@ builder.Services.ConfigureApplicationCookie(options => {
         new SmtpEmailSender(host, port, enablessl, username, password));
     builder.Services.AddScoped<UserManager<User>>();
     builder.Services.AddSignalR();
-    builder.Services.Configure<MqttConfig>(builder.Configuration.GetSection("Mqtt"));
-    builder.Services.AddSingleton<IMqttService, MqttService>();
-    builder.Services.AddHostedService(provider => (MqttService)provider.GetService<IMqttService>());
+    builder.Services.Configure<MqttConfig>(builder.Configuration.GetSection("MqttConfig"));
+    builder.Services.AddScoped<IMqttService, MqttService>();
+    builder.Services.AddHostedService<MqttService>();
 #endregion
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -158,7 +158,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
-
+app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

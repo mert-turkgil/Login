@@ -6,9 +6,9 @@ using Microsoft.Extensions.Hosting;
 
 namespace Login.Services
 {
-    public interface IMqttService 
+    public interface IMqttService
     {
+        Task ConnectAsync();
         Task PublishAsync(string topic, string message);
-        Task SubscribeAsync(string topic);
     }
 }

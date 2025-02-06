@@ -1,115 +1,155 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MQTTnet;
+using MQTTnet.Client;
+using MQTTnet.Client.Options;
 using MQTTnet.Protocol;
+using Login.Services;
 
 namespace Login.Services
 {
-public class MqttService : IMqttService, IHostedService, IDisposable
-{
-    private readonly IMqttClient _mqttClient;
-    private readonly MqttConfig _config;
-    private readonly ILogger<MqttService> _logger;
-    private readonly IHubContext<NotificationHub> _hubContext;
-
-    public MqttService(
-        IOptions<MqttConfig> config,
-        ILogger<MqttService> logger,
-        IHubContext<NotificationHub> hubContext)
+    public class MqttService : IMqttService, IHostedService, IDisposable
     {
-        _config = config.Value;
-        _logger = logger;
-        _hubContext = hubContext;
-        _mqttClient = new MqttFactory().CreateMqttClient();
-        ConfigureMqttClient();
-    }
+        private readonly IMqttClient _mqttClient;
+        private readonly IMqttClientOptions _mqttOptions;
+        private readonly MqttConfig _config;
+        private readonly ILogger<MqttService> _logger;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-    private void ConfigureMqttClient()
-    {
-        _mqttClient.ConnectedAsync += HandleConnectedAsync;
-        _mqttClient.DisconnectedAsync += HandleDisconnectedAsync;
-        _mqttClient.ApplicationMessageReceivedAsync += HandleMessageReceivedAsync;
-    }
-
-    public async Task StartAsync(CancellationToken cancellationToken)
-    {
-        await ConnectToBrokerAsync();
-    }
-
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        await _mqttClient.DisconnectAsync();
-        Dispose();
-    }
-
-    private async Task ConnectToBrokerAsync()
-    {
-        var options = new MqttClientOptionsBuilder()
-            .WithTcpServer(_config.Host, _config.Port)
-            .WithCredentials(_config.Username, _config.Password)
-            .WithClientId($"{_config.ClientId}_{Guid.NewGuid()}")
-            .WithCleanSession()
-            .Build();
-
-        await _mqttClient.ConnectAsync(options, CancellationToken.None);
-    }
-
-    private async Task HandleConnectedAsync(MqttClientConnectedEventArgs e)
-    {
-        _logger.LogInformation("Connected to MQTT broker");
-        await SubscribeAsync("user/+/notifications");
-    }
-
-    private async Task HandleDisconnectedAsync(MqttClientDisconnectedEventArgs e)
-    {
-        _logger.LogWarning("Disconnected from MQTT broker. Attempting reconnect...");
-        await Task.Delay(TimeSpan.FromSeconds(5));
-        await ConnectToBrokerAsync();
-    }
-
-    private async Task HandleMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs e)
-    {
-        try
+        public MqttService(
+            IOptions<MqttConfig> config,
+            ILogger<MqttService> logger,
+            IHubContext<NotificationHub> hubContext)
         {
-            var topic = e.ApplicationMessage.Topic;
-            var payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-            
-            if (topic.StartsWith("user/") && topic.EndsWith("/notifications"))
+            _config = config.Value;
+            _logger = logger;
+            _hubContext = hubContext;
+
+            // Create the MQTT client using the factory.
+            var factory = new MqttFactory();
+            _mqttClient = factory.CreateMqttClient();
+
+            // Build the MQTT client options.
+            _mqttOptions = new MqttClientOptionsBuilder()
+                .WithTcpServer(_config.Host, _config.Port)
+                .WithCredentials(_config.Username, _config.Password)
+                .WithClientId($"{_config.ClientId}_{Guid.NewGuid()}")
+                .WithCleanSession()
+                .Build();
+
+            ConfigureMqttClient();
+        }
+
+        private void ConfigureMqttClient()
+        {
+            // Set up the connected handler.
+            _mqttClient.UseConnectedHandler(async e =>
             {
-                var userId = topic.Split('/')[1];
-                await _hubContext.Clients.User(userId).SendAsync("ReceiveNotification", payload);
+                _logger.LogInformation("Connected to MQTT broker.");
+
+                // Subscribe to topics for room numbers 1 to 12.
+                for (int room = 1; room <= 12; room++)
+                {
+                    string statusTopic = $"ciceklisogukhavadeposu/control_room/room{room}/status";
+                    string tempTopic = $"ciceklisogukhavadeposu/control_room/room{room}/temp";
+
+                    // Use the simple SubscribeAsync overload (topic, QoS)
+                    await _mqttClient.SubscribeAsync(statusTopic, MqttQualityOfServiceLevel.AtLeastOnce);
+                    await _mqttClient.SubscribeAsync(tempTopic, MqttQualityOfServiceLevel.AtLeastOnce);
+
+                    _logger.LogInformation($"Subscribed to: {statusTopic} and {tempTopic}");
+                }
+            });
+
+            // Set up the disconnected handler.
+            _mqttClient.UseDisconnectedHandler(async e =>
+            {
+                _logger.LogWarning("Disconnected from MQTT broker. Attempting reconnect...");
+                await Task.Delay(TimeSpan.FromSeconds(5));
+                await ConnectAsync(CancellationToken.None);
+            });
+
+            // Set up the message received handler.
+            _mqttClient.UseApplicationMessageReceivedHandler(async e =>
+            {
+                try
+                {
+                    var topic = e.ApplicationMessage.Topic;
+                    var payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+                    _logger.LogInformation($"Message received on topic {topic}: {payload}");
+
+                    // Broadcast the message to all SignalR clients.
+                    await _hubContext.Clients.All.SendAsync("ReceiveNotification", topic, payload);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing MQTT message");
+                }
+            });
+        }
+
+        public async Task ConnectAsync(CancellationToken cancellationToken = default)
+        {
+            if (!_mqttClient.IsConnected)
+            {
+                await _mqttClient.ConnectAsync(_mqttOptions, cancellationToken);
             }
         }
-        catch (Exception ex)
+
+        public async Task PublishAsync(string topic, string message)
         {
-            _logger.LogError(ex, "Error processing MQTT message");
+            if (!_mqttClient.IsConnected)
+            {
+                await ConnectAsync(CancellationToken.None);
+            }
+
+            var mqttMessage = new MqttApplicationMessageBuilder()
+                .WithTopic(topic)
+                .WithPayload(Encoding.UTF8.GetBytes(message))
+                .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+                .Build();
+
+            await _mqttClient.PublishAsync(mqttMessage, CancellationToken.None);
+            _logger.LogInformation($"Published message to topic '{topic}': {message}");
         }
-    }
 
-    public async Task PublishAsync(string topic, string message)
-    {
-        var mqttMessage = new MqttApplicationMessageBuilder()
-            .WithTopic(topic)
-            .WithPayload(Encoding.UTF8.GetBytes(message))
-            .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
-            .Build();
+        public async Task SubscribeAsync(string topic)
+        {
+            // Subscribe using the simpler overload available in v5.
+            await _mqttClient.SubscribeAsync(topic, MqttQualityOfServiceLevel.AtLeastOnce);
+        }
 
-        await _mqttClient.PublishAsync(mqttMessage);
-    }
+        // IHostedService implementation.
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            await ConnectAsync(cancellationToken);
+        }
 
-    public async Task SubscribeAsync(string topic)
-    {
-        await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(topic).Build());
-    }
+        public void Dispose()
+        {
+            _mqttClient?.Dispose();
+            GC.SuppressFinalize(this);
+        }
+        public async Task ConnectAsync()
+        {
+            if (!_mqttClient.IsConnected)
+            {
+                await _mqttClient.ConnectAsync(_mqttOptions);
+            }
+        }
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            if (_mqttClient.IsConnected)
+            {
+                await _mqttClient.DisconnectAsync();
+            }
+        }
 
-    public void Dispose()
-    {
-        _mqttClient?.Dispose();
-        GC.SuppressFinalize(this);
     }
-}
 }

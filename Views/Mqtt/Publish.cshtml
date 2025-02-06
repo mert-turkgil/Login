@@ -1,0 +1,24 @@
+@{
+    ViewData["Title"] = "Publish MQTT Message";
+}
+
+<h2>Publish MQTT Message</h2>
+
+<form asp-action="Publish" method="post">
+    <div class="form-group">
+        <label for="topic">Topic:</label>
+        <input type="text" class="form-control" id="topic" name="topic" placeholder="Enter topic" required />
+    </div>
+    <div class="form-group">
+        <label for="message">Message:</label>
+        <textarea class="form-control" id="message" name="message" rows="3" placeholder="Enter message" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Publish</button>
+</form>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success mt-3">
+        @ViewBag.Message
+    </div>
+}
