@@ -48,6 +48,7 @@ C:\Users\mertu\Desktop\Login\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\mertu\Desktop\Login\bin\Debug\net8.0\Microsoft.SqlServer.Server.dll
 C:\Users\mertu\Desktop\Login\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
 C:\Users\mertu\Desktop\Login\bin\Debug\net8.0\Mono.TextTemplating.dll
+C:\Users\mertu\Desktop\Login\bin\Debug\net8.0\MQTTnet.dll
 C:\Users\mertu\Desktop\Login\bin\Debug\net8.0\Newtonsoft.Json.dll
 C:\Users\mertu\Desktop\Login\bin\Debug\net8.0\Newtonsoft.Json.Bson.dll
 C:\Users\mertu\Desktop\Login\bin\Debug\net8.0\System.Resources.NetStandard.dll
@@ -138,6 +139,7 @@ C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\Login.MvcApplicationPartsAssemblyI
 C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\Login.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\Login.RazorAssemblyInfo.cache
 C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\Login.RazorAssemblyInfo.cs
+C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\Login.sourcelink.json
 C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\staticwebassets\msbuild.Login.Microsoft.AspNetCore.StaticWebAssets.props
@@ -154,5 +156,3 @@ C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\refint\Login.dll
 C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\Login.pdb
 C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\Login.genruntimeconfig.cache
 C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\ref\Login.dll
-C:\Users\mertu\Desktop\Login\bin\Debug\net8.0\MQTTnet.dll
-C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\Login.sourcelink.json

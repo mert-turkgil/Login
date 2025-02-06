@@ -8,7 +8,7 @@
     ".NETCoreApp,Version=v8.0": {
       "Login/1.0.0": {
         "dependencies": {
-          "MQTTnet": "5.0.1.1416",
+          "MQTTnet": "3.1.2",
           "Microsoft.AspNetCore.Authentication.Google": "8.0.10",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "8.0.10",
           "Microsoft.AspNetCore.Identity.UI": "8.0.10",
@@ -804,11 +804,11 @@
           }
         }
       },
-      "MQTTnet/5.0.1.1416": {
+      "MQTTnet/3.1.2": {
         "runtime": {
-          "lib/net8.0/MQTTnet.dll": {
-            "assemblyVersion": "5.0.1.1416",
-            "fileVersion": "5.0.1.1416"
+          "lib/net5.0/MQTTnet.dll": {
+            "assemblyVersion": "3.1.2.0",
+            "fileVersion": "3.1.2.0"
           }
         }
       },
@@ -1521,12 +1521,12 @@
       "path": "mono.texttemplating/2.2.1",
       "hashPath": "mono.texttemplating.2.2.1.nupkg.sha512"
     },
-    "MQTTnet/5.0.1.1416": {
+    "MQTTnet/3.1.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ONYieEMaHiIei5dAtHXywnfJGhmrd5Av5sNJSQERp6AtZdPk3xxjCR6Cv0C5RUr/XbLeHO4/HQ0Rc2bQ5NF5Mw==",
-      "path": "mqttnet/5.0.1.1416",
-      "hashPath": "mqttnet.5.0.1.1416.nupkg.sha512"
+      "sha512": "sha512-074AmNXQSs6S3vKyWqYIVvVCeyydCYhOLqfTfRXTaOihQTLAeKRnZh8c3Xhsvct4Rn+tCORFpUdLE35lH4c5Aw==",
+      "path": "mqttnet/3.1.2",
+      "hashPath": "mqttnet.3.1.2.nupkg.sha512"
     },
     "Newtonsoft.Json/13.0.3": {
       "type": "package",

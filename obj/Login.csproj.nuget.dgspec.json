@@ -50,17 +50,9 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
-            "MQTTNet.Client": {
-              "target": "Package",
-              "version": "[2.0.1, )"
-            },
             "MQTTnet": {
               "target": "Package",
-              "version": "[3.0.2, )"
-            },
-            "MQTTnet.Extensions.ManagedClient": {
-              "target": "Package",
-              "version": "[4.3.7.1207, )"
+              "version": "[3.1.2, )"
             },
             "Microsoft.AspNetCore.Authentication.Google": {
               "target": "Package",

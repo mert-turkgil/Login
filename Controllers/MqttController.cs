@@ -22,8 +22,18 @@ namespace Login.Controllers
         [HttpGet]
         public IActionResult Publish()
         {
+            // Example subscribed topics
+            var subscribedTopics = new List<string>();
+            for (int i = 1; i <= 12; i++)
+            {
+                subscribedTopics.Add($"ciceklisogukhavadeposu/control_room/room{i}/status");
+                subscribedTopics.Add($"ciceklisogukhavadeposu/control_room/room{i}/temp");
+            }
+
+            ViewBag.Topics = subscribedTopics;
             return View();
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

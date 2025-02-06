@@ -4,54 +4,109 @@
 @model Login.Identity.User
 
 <div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-info text-white">
-                    <h3 class="card-title mb-0"><i class="fas fa-user-circle"></i> Account Details</h3>
-                </div>
-                <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-sm-3">Full Name:</dt>
-                        <dd class="col-sm-9">@(Model?.FirstName ?? "N/A") @(Model?.LastName ?? "N/A")</dd>
+    <div class="card shadow">
+        <div class="card-header bg-info text-white">
+            <h3 class="card-title mb-0"><i class="fas fa-user-circle"></i> Account Details</h3>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Full Name:</dt>
+                <dd class="col-sm-9">@(Model?.FirstName ?? "N/A") @(Model?.LastName ?? "N/A")</dd>
 
-                        <dt class="col-sm-3">Email:</dt>
-                        <dd class="col-sm-9">@(Model?.Email ?? "N/A")</dd>
+                <dt class="col-sm-3">Email:</dt>
+                <dd class="col-sm-9">@(Model?.Email ?? "N/A")</dd>
 
-                        <dt class="col-sm-3">Account Created:</dt>
-                        <dd class="col-sm-9">@(Model?.CreatedDate.ToString("MMMM dd, yyyy") ?? "N/A")</dd>
+                <dt class="col-sm-3">Account Created:</dt>
+                <dd class="col-sm-9">@(Model?.CreatedDate.ToString("MMMM dd, yyyy") ?? "N/A")</dd>
 
-                        <dt class="col-sm-3">User Name:</dt>
-                        <dd class="col-sm-9">@(Model?.UserName ?? "N/A")</dd>
+                <dt class="col-sm-3">User Name:</dt>
+                <dd class="col-sm-9">@(Model?.UserName ?? "N/A")</dd>
 
-                        <dt class="col-sm-3">Role Name:</dt>
-                        <dd class="col-sm-9">
-                            @{
-                                var userRoles = await _userManager.GetRolesAsync(Model);
-                                if (userRoles != null && userRoles.Any())
+                <dt class="col-sm-3">Role Name:</dt>
+                <dd class="col-sm-9">
+                    @{
+                        var userRoles = await _userManager.GetRolesAsync(Model);
+                        if (userRoles != null && userRoles.Any())
+                        {
+                            <ul>
+                                @foreach (var role in userRoles)
                                 {
-                                    <ul>
-                                        @foreach (var role in userRoles)
-                                        {
-                                            <li>@role</li>
-                                        }
-                                    </ul>
+                                    <li>@role</li>
                                 }
-                                else
-                                {
-                                    <span>N/A</span>
-                                }
-                            }
-                        </dd>
-                    </dl>
-
-                    <div class="text-center mt-4">
-                        <form asp-action="Logout" method="post">
-                            <button type="submit" class="btn btn-danger btn-lg"><i class="fas fa-sign-out-alt"></i> Log Out</button>
-                        </form>
-                    </div>
-                </div>
+                            </ul>
+                        }
+                        else
+                        {
+                            <span>N/A</span>
+                        }
+                    }
+                </dd>
+            </dl>
+            <div class="text-center mt-4">
+                <form asp-action="Logout" method="post">
+                    <button type="submit" class="btn btn-danger btn-lg"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+                </form>
             </div>
         </div>
     </div>
+
+    <!-- MQTT Real-Time Dashboard -->
+    <div class="card shadow mt-4">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title mb-0"><i class="fas fa-tv"></i> Real-Time Room Data</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Room</th>
+                        <th>Status</th>
+                        <th>Temperature</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 1; i <= 12; i++)
+                    {
+                        <tr>
+                            <td>Room @i</td>
+                            <td id="roomStatus_@i">Loading...</td>
+                            <td id="roomTemp_@i">Loading...</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
+<!-- Include SignalR client library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    // Create connection to the SignalR hub
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/notificationHub")
+        .build();
+
+    // Listen for incoming MQTT notifications
+    connection.on("ReceiveNotification", (topic, payload) => {
+        // Example topics:
+        // ciceklisogukhavadeposu/control_room/room1/status
+        // ciceklisogukhavadeposu/control_room/room1/temp
+        const statusRegex = /ciceklisogukhavadeposu\/control_room\/room(\d+)\/status/;
+        const tempRegex = /ciceklisogukhavadeposu\/control_room\/room(\d+)\/temp/;
+
+        let match;
+        if (match = statusRegex.exec(topic)) {
+            const roomNumber = match[1];
+            document.getElementById(`roomStatus_${roomNumber}`).innerText = payload;
+        }
+        if (match = tempRegex.exec(topic)) {
+            const roomNumber = match[1];
+            document.getElementById(`roomTemp_${roomNumber}`).innerText = payload;
+        }
+    });
+
+    connection.start()
+        .then(() => console.log("Connected to NotificationHub"))
+        .catch(err => console.error("Error connecting to NotificationHub: ", err));
+</script>

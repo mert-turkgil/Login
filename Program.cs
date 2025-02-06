@@ -1,4 +1,5 @@
 using Login.EmailServices;
+using Login.Hubs;
 using Login.Identity;
 using Login.Services;
 using Microsoft.AspNetCore.Identity;
