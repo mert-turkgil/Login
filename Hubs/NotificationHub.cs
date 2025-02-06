@@ -44,11 +44,12 @@ namespace Login.Hubs
             await Clients.Caller.SendAsync("ReceiveNotification", "Connected to NotificationHub");
             await base.OnConnectedAsync();
         }
-        public override async Task OnDisconnectedAsync(System.Exception exception)
+        public override async Task OnDisconnectedAsync(System.Exception? exception)
         {
             // Optionally handle disconnection, such as removing the connection from groups.
             await base.OnDisconnectedAsync(exception);
         }
-        
+
+                
     }
 }

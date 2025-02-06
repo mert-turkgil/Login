@@ -146,8 +146,16 @@ public class HomeController : Controller
                  ModelState.AddModelError(string.Empty, "Invalid login attempt: user not found.");
                  return View("Index", model);
              }
+            if (string.IsNullOrEmpty(user?.UserName))
+            {
+                // Handle the null case appropriately, e.g., return an error or log it
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return View(model);
+            }
+
             // Sign in the user
             var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberMe, lockoutOnFailure: true);
+
 
             // Check if the account is locked out
             if (await _userManager.IsLockedOutAsync(user))

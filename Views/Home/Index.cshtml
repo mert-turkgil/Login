@@ -44,7 +44,11 @@
                     else
                     {
                         <div class="text-center">
-                            <h3>Welcome back, @UserManager.GetUserAsync(User).Result.FirstName!</h3>
+                            @{
+                            var currentUser = UserManager.GetUserAsync(User).Result;
+                            var firstName = currentUser?.FirstName ?? "Guest";
+                            }
+                            <h3>Welcome back, @firstName!</h3>
                             <p class="lead">You're already signed in.</p>
                             <form asp-action="Logout" method="post">
                                 <button type="submit" class="btn btn-danger btn-lg"><i class="fas fa-sign-out-alt"></i> Log Out</button>
