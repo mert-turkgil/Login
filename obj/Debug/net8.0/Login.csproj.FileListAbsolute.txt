@@ -154,3 +154,5 @@ C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\refint\Login.dll
 C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\Login.pdb
 C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\Login.genruntimeconfig.cache
 C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\ref\Login.dll
+C:\Users\mertu\Desktop\Login\bin\Debug\net8.0\MQTTnet.dll
+C:\Users\mertu\Desktop\Login\obj\Debug\net8.0\Login.sourcelink.json

@@ -1,24 +1,30 @@
 using Login.EmailServices;
 using Login.Identity;
+using Login.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-#region değişken
-// Load configuration
+#region Configuration
 var config = builder.Configuration;
 
-// Configure EmailSender settings
+// Load email settings
 var emailSettings = config.GetSection("EmailSender");
 var port = emailSettings.GetValue<int>("Port");
 var host = emailSettings.GetValue<string>("SMTPMail");
-var enablessl = true; // Gmail typically requires SSL
-var username = emailSettings.GetValue<string>("Username");
-var password = emailSettings.GetValue<string>("Password");
-var connectionString = builder.Configuration.GetConnectionString("MsSqlConnection") 
+var enablessl = true; // Gmail requires SSL
+var username = Environment.GetEnvironmentVariable("EmailSender_Username") 
+    ?? emailSettings.GetValue<string>("Username");
+var password = Environment.GetEnvironmentVariable("EmailSender_Password") 
+    ?? emailSettings.GetValue<string>("Password");
+
+// Load database connection string
+var connectionString = Environment.GetEnvironmentVariable("MsSqlConnection") 
+    ?? builder.Configuration.GetConnectionString("MsSqlConnection") 
     ?? throw new InvalidOperationException("Connection string 'MsSqlConnection' not found.");
 #endregion
+
 #region Database
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 #endregion
@@ -80,6 +86,10 @@ builder.Services.ConfigureApplicationCookie(options => {
     builder.Services.AddScoped<Login.EmailServices.IEmailSender, SmtpEmailSender>(i =>
         new SmtpEmailSender(host, port, enablessl, username, password));
     builder.Services.AddScoped<UserManager<User>>();
+    builder.Services.AddSignalR();
+    builder.Services.Configure<MqttConfig>(builder.Configuration.GetSection("Mqtt"));
+    builder.Services.AddSingleton<IMqttService, MqttService>();
+    builder.Services.AddHostedService(provider => (MqttService)provider.GetService<IMqttService>());
 #endregion
 // Add services to the container.
 builder.Services.AddControllersWithViews();
