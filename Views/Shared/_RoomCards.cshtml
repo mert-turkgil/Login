@@ -1,0 +1,59 @@
+@model List<Login.Models.RoomCardModel>
+
+<div class="row">
+    @foreach (var room in Model)
+    {
+        <div class="col-md-4 col-lg-3 mb-4">
+            <div class="card h-100 position-relative shadow-lg border-0 rounded-lg">
+                <!-- Room Header -->
+                <div class="card-header text-white text-center" style="background: linear-gradient(45deg, #3a3a3a, #5a5a5a);">
+                    <h5 class="mb-0">@room.RoomName</h5>
+                </div>
+                
+                <!-- Card Body -->
+                <div class="card-body d-flex flex-column align-items-center text-center">
+                    @if (room.Status == "Loading")
+                    {
+                        <div class="placeholder-glow w-100">
+                            <p class="placeholder col-7"></p>
+                            <p class="placeholder col-4"></p>
+                            <p class="placeholder col-6"></p>
+                            <p class="placeholder col-8"></p>
+                        </div>
+                        <div class="spinner-border text-warning mt-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="fw-bold text-secondary">Status: <span id="roomStatus_@room.id">@room.Status</span></p>
+                        
+                        <p class="temperature-display fw-bold" id="roomTemp_@room.id" 
+                           style="font-size: 1.5rem; color: @(room.Temperature > 30 ? "red" : room.Temperature < 10 ? "blue" : "black")">
+                            @room.Temperature°C
+                        </p>
+                        
+                        <!-- Weather Condition -->
+                        <p class="weather-condition" id="weather_@room.id">
+                            @{ 
+                                string weather = "";
+                                if (room.Temperature >= 50) weather = "🔥 Burning Hot";
+                                else if (room.Temperature > 30) weather = "☀️ Sunny";
+                                else if (room.Temperature > 20) weather = "🌤️ Pleasant";
+                                else if (room.Temperature > 10) weather = "🌥️ Chilly";
+                                else if (room.Temperature >= 0) weather = "❄️ Snowy";
+                                else weather = "🧊 Ice Cold";
+                            }
+                            <span>@weather</span>
+                        </p>
+
+                        <!-- Set Temperature Button -->
+                        <button class="btn btn-warning btn-sm mt-2 px-4" onclick="changeTemp(@room.id)">
+                            <i class="fas fa-thermometer-half"></i> Set Temp
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

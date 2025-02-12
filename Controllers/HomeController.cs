@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Login.ViewModels;
 using Login.Identity;
 using Login.EmailServices;
+using Login.Models;
+
 
 public class HomeController : Controller
 {
@@ -132,7 +134,7 @@ public class HomeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(LoginViewModel model)
+    public async Task<IActionResult> Login(Login.ViewModels.LoginViewModel model)
     {
         if (!ModelState.IsValid)
             {
@@ -182,16 +184,44 @@ public class HomeController : Controller
             return View("Index", model);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Account()
-    {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
+        [HttpGet]
+        public async Task<IActionResult> Account()
         {
-            return RedirectToAction("Index");
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            // Convert to UserViewModel
+            var userViewModel = new UserViewModel
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                CreatedDate = user.CreatedDate,
+                UserName = user.UserName,
+                User = user,
+                RoomCards = new List<RoomCardModel>()
+            };
+
+            // Create a list of 12 room cards
+            for (int i = 1; i <= 12; i++)
+            {
+                userViewModel.RoomCards.Add(new RoomCardModel
+                {
+                    id = i,
+                    RoomName = $"Room {i}",
+                    Status = "Loading...",
+                    Temperature = 0
+                });
+            }
+
+            return View(userViewModel);
         }
-        return View(user);
-    }
+
+
 
     [HttpPost]
     [ValidateAntiForgeryToken]

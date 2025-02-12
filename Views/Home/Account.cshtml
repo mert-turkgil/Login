@@ -1,7 +1,13 @@
 @using Login.Identity
 @inject RoleManager<IdentityRole> _roleManager
 @inject UserManager<User> _userManager
-@model Login.Identity.User
+@model Login.Models.UserViewModel
+
+@section Scripts{ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<!-- Include external JavaScript for MQTT dashboard functionality -->
+<script src="~/js/mqtt-dashboard.js"></script>
+}
 
 <div class="container mt-5">
     <div class="card shadow">
@@ -25,7 +31,7 @@
                 <dt class="col-sm-3">Role Name:</dt>
                 <dd class="col-sm-9">
                     @{
-                        var userRoles = await _userManager.GetRolesAsync(Model!);
+                        var userRoles = await _userManager.GetRolesAsync(Model!.User);
                         if (userRoles != null && userRoles.Any())
                         {
                             <ul>
@@ -50,63 +56,24 @@
         </div>
     </div>
 
-    <!-- MQTT Real-Time Dashboard -->
+    <!-- Partial View for Room Cards -->
     <div class="card shadow mt-4">
         <div class="card-header bg-primary text-white">
             <h3 class="card-title mb-0"><i class="fas fa-tv"></i> Real-Time Room Data</h3>
         </div>
         <div class="card-body">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Room</th>
-                        <th>Status</th>
-                        <th>Temperature</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (int i = 1; i <= 12; i++)
-                    {
-                        <tr>
-                            <td>Room @i</td>
-                            <td id="roomStatus_@i">Loading...</td>
-                            <td id="roomTemp_@i">Loading...</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+            @Html.Partial("_RoomCards", Model.RoomCards)
         </div>
     </div>
+            @* Only display Shutdown button if the user is an Admin *@
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="text-center mt-3">
+                    <button id="btnShutdownAll" class="btn btn-danger">
+                        Shutdown All Rooms
+                    </button>
+                </div>
+            }
 </div>
 
-<!-- Include SignalR client library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-<script>
-    // Create connection to the SignalR hub
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/notificationHub")
-        .build();
 
-    // Listen for incoming MQTT notifications
-    connection.on("ReceiveNotification", (topic, payload) => {
-        // Example topics:
-        // ciceklisogukhavadeposu/control_room/room1/status
-        // ciceklisogukhavadeposu/control_room/room1/temp
-        const statusRegex = /ciceklisogukhavadeposu\/control_room\/room(\d+)\/status/;
-        const tempRegex = /ciceklisogukhavadeposu\/control_room\/room(\d+)\/temp/;
-
-        let match;
-        if (match = statusRegex.exec(topic)) {
-            const roomNumber = match[1];
-            document.getElementById(`roomStatus_${roomNumber}`).innerText = payload;
-        }
-        if (match = tempRegex.exec(topic)) {
-            const roomNumber = match[1];
-            document.getElementById(`roomTemp_${roomNumber}`).innerText = payload;
-        }
-    });
-
-    connection.start()
-        .then(() => console.log("Connected to NotificationHub"))
-        .catch(err => console.error("Error connecting to NotificationHub: ", err));
-</script>
