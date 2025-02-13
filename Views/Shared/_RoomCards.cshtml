@@ -23,6 +23,8 @@
                         <div class="spinner-border text-warning mt-3" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
+
+                        <!-- Optionally, you can also add a Start Cooling button here if needed -->
                     }
                     else
                     {
@@ -48,9 +50,26 @@
                         </p>
 
                         <!-- Set Temperature Button -->
-                        <button class="btn btn-warning btn-sm mt-2 px-4" onclick="changeTemp(@room.id)">
-                            <i class="fas fa-thermometer-half"></i> Set Temp
-                        </button>
+                        <form method="post" 
+                              asp-controller="Mqtt" 
+                              asp-action="ChangeTempForm" 
+                              class="mt-2 d-flex justify-content-center align-items-center">
+                        <div class="input-group">
+                            <input type="hidden" name="id" value="@room.id" />
+                            <input type="number" name="Temperature" class="form-control w-50" value="@room.Temperature" />
+                            <button type="submit" class="btn btn-warning btn-sm">
+                                <i class="fas fa-thermometer-half"></i> Set Temp
+                            </button>
+                        </div>
+                        </form>
+                        
+                        <!-- Shutdown Room Button -->
+                        <form method="post" asp-controller="Mqtt" asp-action="ShutdownRoom" class="mt-2 w-100"> 
+                            <input type="hidden" name="id" value="@room.id" />
+                            <button type="submit" class="btn btn-danger btn-sm ">
+                                <i class="fas fa-power-off"></i> Shutdown
+                            </button>
+                        </form>
                     }
                 </div>
             </div>

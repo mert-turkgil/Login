@@ -40,6 +40,16 @@ namespace Login.Controllers
             return View(rooms);
         }
 
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Publish(string topic, string message)
+        {
+            await _mqttService.PublishAsync(topic, message);
+            ViewBag.Message = "Message published successfully!";
+            return View();
+        }
+
         // POST: /Mqtt/ChangeTemp
         [HttpPost("ChangeTemp")]
         [ValidateAntiForgeryToken]
@@ -68,15 +78,57 @@ namespace Login.Controllers
             return Ok(new { message = "Shutdown command published for all rooms" });
         }
 
-
-
-        [HttpPost]
+        [HttpPost("StartCooling")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Publish(string topic, string message)
+        public async Task<IActionResult> StartCooling(int id)
         {
-            await _mqttService.PublishAsync(topic, message);
-            ViewBag.Message = "Message published successfully!";
-            return View();
+            // You can define your own MQTT topic for starting the cooling system.
+            // Example: ciceklisogukhavadeposu/control_room/room{id}/start
+            string topic = $"ciceklisogukhavadeposu/control_room/room{id}/start";
+
+            await _mqttService.PublishAsync(topic, "start");
+            
+            // Optionally, set TempData or ViewBag to display a message in the UI
+            TempData["SuccessMessage"] = $"Cooling system started for Room {id}.";
+
+            // Redirect back to the Publish view to see updated statuses
+            return RedirectToAction("Publish");
+        }
+
+        [HttpPost("ChangeTempForm")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeTempForm([FromForm] RoomCardModel model)
+        {
+            if (model == null || model.id < 1 || model.id > 12)
+            {
+                TempData["ErrorMessage"] = "Invalid room ID.";
+                return RedirectToAction("Publish");
+            }
+
+            string topic = $"ciceklisogukhavadeposu/control_room/room{model.id}/temp";
+            await _mqttService.PublishAsync(topic, model.Temperature.ToString());
+
+            TempData["SuccessMessage"] = $"Temperature update published: {model.Temperature}°C for Room {model.id}.";
+            return RedirectToAction("Publish");
+        }
+
+        // POST: /Mqtt/ShutdownRoom
+        [HttpPost("ShutdownRoom")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ShutdownRoom([FromForm] int id)
+        {
+            if (id < 1 || id > 12)
+            {
+                TempData["ErrorMessage"] = "Invalid room ID.";
+                return RedirectToAction("Publish");
+            }
+
+            // Construct the topic for shutting down this specific room.
+            string topic = $"ciceklisogukhavadeposu/control_room/room{id}/shutdown";
+            await _mqttService.PublishAsync(topic, "shutdown");
+
+            TempData["SuccessMessage"] = $"Shutdown command published for Room {id}.";
+            return RedirectToAction("Publish");
         }
     }
 }
