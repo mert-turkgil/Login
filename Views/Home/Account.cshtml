@@ -48,13 +48,38 @@
                     }
                 </dd>
             </dl>
+            <div class="navbar">
             <div class="text-center mt-4">
                 <form asp-action="Logout" method="post">
                     <button type="submit" class="btn btn-danger btn-lg"><i class="fas fa-sign-out-alt"></i> Log Out</button>
                 </form>
             </div>
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="text-center mt-3">
+                    <button id="btnShutdownAll" class="btn btn-danger btn-lg">
+                        Shutdown All Rooms
+                    </button>
+                </div>
+            }
+            </div>
         </div>
     </div>
+
+    @if(User.IsInRole("Admin"))
+    {
+        <section id="UserManagment">
+        <div class="card shadow mt-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0"><i class="fas fa-tv"></i> User Managment</h3>
+            </div>
+            <div class="card-body">
+                <!-- Invoke the User Management ViewComponent -->
+                @await Component.InvokeAsync("UserManagement")
+            </div>
+        </div>
+        </section>
+    }
 
     <!-- Partial View for Room Cards -->
     <div class="card shadow mt-4">
@@ -62,18 +87,10 @@
             <h3 class="card-title mb-0"><i class="fas fa-tv"></i> Real-Time Room Data</h3>
         </div>
         <div class="card-body">
-            @Html.Partial("_RoomCards", Model.RoomCards)
+           <partial name="_RoomCards" model="Model.RoomCards" />
         </div>
     </div>
-            @* Only display Shutdown button if the user is an Admin *@
-            @if (User.IsInRole("Admin"))
-            {
-                <div class="text-center mt-3">
-                    <button id="btnShutdownAll" class="btn btn-danger">
-                        Shutdown All Rooms
-                    </button>
-                </div>
-            }
+
 </div>
 
 

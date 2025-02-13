@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Login.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
     @await RenderSectionAsync("Css", required: false)
 </head>
 <body>
@@ -24,7 +26,7 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Account">Dashboard</a>
                         </li>
                     </ul>
                 </div>
@@ -33,6 +35,22 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Success:</strong> @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error:</strong> @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
             @RenderBody()
         </main>
     </div>
@@ -45,6 +63,36 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#blogsTable').DataTable({
+                responsive: true,
+                language: {
+                    search: "Search:",
+                    lengthMenu: "Show _MENU_ products",
+                    info: "Showing _START_ to _END_ of _TOTAL_ products",
+                    paginate: {
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                },
+                columnDefs: [{ orderable: false, targets: -1 }]
+            });
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script src="~/js/Acc.js" asp-append-version="true"></script>
+    <script>
+    setTimeout(function () {
+        let alerts = document.querySelectorAll(".alert");
+        alerts.forEach(alert => {
+            let bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000); // Auto close after 5 seconds
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

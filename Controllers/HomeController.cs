@@ -5,6 +5,7 @@ using Login.ViewModels;
 using Login.Identity;
 using Login.EmailServices;
 using Login.Models;
+using Microsoft.AspNetCore.Authorization;
 
 
 public class HomeController : Controller
@@ -13,8 +14,11 @@ public class HomeController : Controller
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
 
-    public HomeController(IEmailSender emailSender,UserManager<User> userManager, SignInManager<User> signInManager)
+    private readonly RoleManager<IdentityRole> _roleManager;
+
+    public HomeController(IEmailSender emailSender,UserManager<User> userManager, SignInManager<User> signInManager,RoleManager<IdentityRole> roleManager)
     {
+        _roleManager = roleManager;
         _emailSender = emailSender;
         _userManager = userManager;
         _signInManager = signInManager;
@@ -230,4 +234,152 @@ public class HomeController : Controller
         await _signInManager.SignOutAsync();
         return RedirectToAction("Index");
     }
+        #region User
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> UserDelete(string id)
+        {
+            // Find the user by ID
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user != null)
+            {
+                // Check if the user is an Admin
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Contains("Admin"))
+                {
+                    TempData["ErrorMessage"] = "You cannot delete an Admin user.";
+                    return RedirectToAction("Account");
+                }
+
+                // Proceed to delete the user
+                var result = await _userManager.DeleteAsync(user);
+                if (result.Succeeded)
+                {
+                    TempData["SuccessMessage"] = "User deleted successfully.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Error occurred while deleting the user.";
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "User not found.";
+            }
+
+            return RedirectToAction("Account");
+        }
+
+        // Edit User Method
+        [HttpGet("Home/UserEdit/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UserEdit(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "User not found.";
+                return RedirectToAction("Account");
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User!);
+            var currentRoles = await _userManager.GetRolesAsync(currentUser!);
+
+            // Only Admins can edit Admins
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            var currentUserIsAdmin = currentRoles.Contains("Admin");
+
+            if (isAdmin && !currentUserIsAdmin)
+            {
+                TempData["ErrorMessage"] = "You do not have permission to edit this user.";
+                return RedirectToAction("Account");
+            }
+
+            var model = new UserEditModel
+            {
+                UserId = user.Id,
+                CreatedDate = user.CreatedDate,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                EmailConfirmed = user.EmailConfirmed,
+                SelectedRoles = (await _userManager.GetRolesAsync(user)).ToList(),
+                AllRoles = _roleManager.Roles.Select(r => r.Name).ToList()
+            };
+
+            return View(model);
+        }
+
+        [HttpPost("Home/UserEdit/{id}")]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UserEdit(UserEditModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.AllRoles = _roleManager.Roles.Select(r => r.Name).ToList();
+                return View(model);
+            }
+
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "User not found.";
+                return RedirectToAction("Account");
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User!);
+            var currentRoles = await _userManager.GetRolesAsync(currentUser!);
+
+            // Only Root can edit Root
+            var isTargetRoot = user.FirstName == "Root" && user.LastName == "Türkgil";
+            var isCurrentRoot = currentUser!.FirstName == "Root" && currentUser.LastName == "Türkgil";
+
+            if (isTargetRoot && !isCurrentRoot)
+            {
+                TempData["ErrorMessage"] = "Only the Root user can edit the Root user.";
+                return RedirectToAction("Account");
+            }
+
+            // Only Admins can edit Admins
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            var currentUserIsAdmin = currentRoles.Contains("Admin");
+
+            if (isAdmin && !currentUserIsAdmin)
+            {
+                TempData["ErrorMessage"] = "You do not have permission to edit this user.";
+                return RedirectToAction("Account");
+            }
+
+            // Update User Information
+            user.CreatedDate = model.CreatedDate;
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.Email = model.Email;
+            user.EmailConfirmed = model.EmailConfirmed;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                // Update Roles
+                var currentRolesForUser = await _userManager.GetRolesAsync(user);
+                await _userManager.RemoveFromRolesAsync(user, currentRolesForUser);
+                await _userManager.AddToRolesAsync(user, model.SelectedRoles ?? new List<string>());
+
+                TempData["SuccessMessage"] = "User updated successfully!";
+                return RedirectToAction("Account");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            model.AllRoles = _roleManager.Roles.Select(r => r.Name).ToList();
+            return View(model);
+        }
+        #endregion
+        
 }

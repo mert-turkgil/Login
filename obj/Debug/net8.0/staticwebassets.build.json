@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "7f2qqszeKV//VslPG2LZa+WwVWvENExiZAeVKJ8U6do=",
+  "Hash": "uOsUuOr4v6l/MJXHwnFqvO6u5L4a4d/iHZ97JPyCXzY=",
   "Source": "Login",
   "BasePath": "_content/Login",
   "Mode": "Default",
@@ -1231,6 +1231,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\favicon.ico"
+    },
+    {
+      "Identity": "C:\\Users\\mertu\\Desktop\\Login\\wwwroot\\js\\Acc.js",
+      "SourceId": "Login",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\mertu\\Desktop\\Login\\wwwroot\\",
+      "BasePath": "_content/Login",
+      "RelativePath": "js/Acc.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\Acc.js"
     },
     {
       "Identity": "C:\\Users\\mertu\\Desktop\\Login\\wwwroot\\js\\mqtt-dashboard.js",
