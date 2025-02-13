@@ -241,35 +241,43 @@ public class HomeController : Controller
         {
             // Find the user by ID
             var user = await _userManager.FindByIdAsync(id);
-
-            if (user != null)
+            if (user == null)
             {
-                // Check if the user is an Admin
-                var roles = await _userManager.GetRolesAsync(user);
-                if (roles.Contains("Admin"))
-                {
-                    TempData["ErrorMessage"] = "You cannot delete an Admin user.";
-                    return RedirectToAction("Account");
-                }
+                TempData["ErrorMessage"] = "User not found.";
+                return RedirectToAction("Account");
+            }
 
-                // Proceed to delete the user
-                var result = await _userManager.DeleteAsync(user);
-                if (result.Succeeded)
-                {
-                    TempData["SuccessMessage"] = "User deleted successfully.";
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "Error occurred while deleting the user.";
-                }
+            // Check if the target user is the Root user.
+            bool isTargetRoot = user.FirstName == "Root" && user.LastName == "Türkgil";
+            if (isTargetRoot)
+            {
+                TempData["ErrorMessage"] = "You cannot delete the Root user.";
+                return RedirectToAction("Account");
+            }
+
+            // Get the roles for the target user.
+            var roles = await _userManager.GetRolesAsync(user);
+            // If the target user is an admin, block deletion.
+            if (roles.Contains("Admin"))
+            {
+                TempData["ErrorMessage"] = "You cannot delete an Admin user.";
+                return RedirectToAction("Account");
+            }
+
+            // Proceed to delete the user.
+            var result = await _userManager.DeleteAsync(user);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "User deleted successfully.";
             }
             else
             {
-                TempData["ErrorMessage"] = "User not found.";
+                TempData["ErrorMessage"] = "Error occurred while deleting the user.";
             }
 
             return RedirectToAction("Account");
         }
+
 
         // Edit User Method
         [HttpGet("Home/UserEdit/{id}")]

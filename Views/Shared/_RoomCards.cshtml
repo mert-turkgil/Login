@@ -72,6 +72,20 @@
                         </form>
                     }
                 </div>
+                @if (room.Status == "Loading...")
+                {
+                    <div class="card-footer">
+                                <form method="post" 
+                                  asp-controller="Mqtt" 
+                                  asp-action="StartCooling" 
+                                  class="w-100">
+                                <input type="hidden" name="id" value="@room.id" />
+                                <button type="submit" class="btn btn-primary btn-sm w-100">
+                                    <i class="fas fa-play"></i> Start Cooling
+                                </button>
+                            </form>
+                    </div>
+                }
             </div>
         </div>
     }
