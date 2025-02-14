@@ -13,14 +13,6 @@
       "PackagePath": "staticwebassets\\favicon.ico"
     },
     {
-      "Id": "C:\\Users\\mertu\\Desktop\\Login\\wwwroot\\js\\Acc.js",
-      "PackagePath": "staticwebassets\\js\\Acc.js"
-    },
-    {
-      "Id": "C:\\Users\\mertu\\Desktop\\Login\\wwwroot\\js\\mqtt-dashboard.js",
-      "PackagePath": "staticwebassets\\js\\mqtt-dashboard.js"
-    },
-    {
       "Id": "C:\\Users\\mertu\\Desktop\\Login\\wwwroot\\js\\site.js",
       "PackagePath": "staticwebassets\\js\\site.js"
     },

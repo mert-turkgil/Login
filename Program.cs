@@ -44,7 +44,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options => {
     // Lockout policy
     options.Lockout.MaxFailedAccessAttempts = 4;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(4);
-    options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.AllowedForNewUsers = false;
 
     // User settings
     options.User.RequireUniqueEmail = true;
@@ -94,6 +94,9 @@ builder.Services.ConfigureApplicationCookie(options => {
 #endregion
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
 
 var app = builder.Build();
 

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Login.ViewModels
+namespace Login.Models
 {
     #nullable disable
     public class SignUpViewModel

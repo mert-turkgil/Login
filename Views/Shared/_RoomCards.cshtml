@@ -3,79 +3,118 @@
 <div class="row">
     @foreach (var room in Model)
     {
-        <div class="col-md-4 col-lg-3 mb-4">
+    <div class="col-md-4 col-lg-3 mb-4" id="roomCard_@room.id">
             <div class="card h-100 position-relative shadow-lg border-0 rounded-lg">
                 <!-- Room Header -->
                 <div class="card-header text-white text-center" style="background: linear-gradient(45deg, #3a3a3a, #5a5a5a);">
                     <h5 class="mb-0">@room.RoomName</h5>
                 </div> 
                 <!-- Card Body -->
-                <div class="card-body d-flex flex-column align-items-center text-center">
-                    @if (room.Status == "Loading...")
-                    {
-                        <div class="placeholder-glow w-100">
-                            <p class="placeholder col-7"></p>
-                            <p class="placeholder col-4"></p>
-                            <p class="placeholder col-6"></p>
-                            <p class="placeholder col-8"></p>
-                        </div>
-                        <div class="spinner-border text-warning mt-3" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    }
-                    @* Çalışıyor *@
-                    @if(room.Status == "1")
-                    {
-                        <p class="fw-bold text-secondary">Status: 
-                            <span id="roomStatus_@room.id" class="badge @(room.Status == "0" ? "bg-danger" : "bg-success")">
-                                @(room.Status == "0" ? "Closed" : "Working")
-                            </span>
-                        </p>
-                        
-                        <p class="temperature-display fw-bold" id="roomTemp_@room.id" 
-                           style="font-size: 1.5rem; color: @(room.Temperature > 30 ? "red" : room.Temperature < 10 ? "blue" : "black")">
-                            @room.Temperature°C
-                        </p>
-                        
-                        <!-- Weather Condition -->
-                        <p class="weather-condition" id="weather_@room.id">
-                            @{ 
-                                string weather = "";
-                                if (room.Temperature >= 50) weather = "🔥 Burning Hot";
-                                else if (room.Temperature > 30) weather = "☀️ Sunny";
-                                else if (room.Temperature > 20) weather = "🌤️ Pleasant";
-                                else if (room.Temperature > 10) weather = "🌥️ Chilly";
-                                else if (room.Temperature >= 0) weather = "❄️ Snowy";
-                                else weather = "🧊 Ice Cold";
-                            }
-                            <span>@weather</span>
-                        </p>
+@* Yükleniyor *@                 @if (room.Status == "Loading...")
+                    {             
+                        <div style="--bs-bg-opacity: .2;" class="card-body d-flex flex-column align-items-center text-center bg-warning">
+                            <div class="placeholder-glow w-100">
+                                <p class="placeholder col-7"></p>
+                                <p class="placeholder col-4"></p>
+                                <p class="placeholder col-6"></p>
+                                <p class="placeholder col-8"></p>
+                            </div>
+                            <div class="spinner-border text-warning mt-3" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
 
-                        <!-- Set Temperature Button -->
-                        <form method="post" 
-                              asp-controller="Mqtt" 
-                              asp-action="ChangeTempForm" 
-                              class="mt-2 d-flex justify-content-center align-items-center">
-                        <div class="input-group">
-                            <input type="hidden" name="id" value="@room.id" />
-                            <input type="number" name="Temperature" class="form-control w-50" value="@room.Temperature" />
-                            <button type="submit" class="btn btn-warning btn-sm" @(room.IsLocked ? "disabled" : "")>
-                                <i class="fas fa-thermometer-half"></i> Set Temp
-                            </button>
                         </div>
-                        </form>
-                        
-                        <!-- Shutdown Room Button -->
-                        <form method="post" asp-controller="Mqtt" asp-action="ShutdownRoom" class="mt-2 w-100"> 
-                            <input type="hidden" name="id" value="@room.id" />
-                            <button type="submit" class="btn btn-danger btn-sm" @(room.IsLocked ? "disabled" : "")>
-                                <i class="fas fa-power-off"></i> Shutdown
-                            </button>
-                        </form>
+                        <div class="card-footer">
+                            <form method="post" 
+                                asp-controller="Mqtt" 
+                                asp-action="StartCooling" 
+                                class="w-100">
+                                <input type="hidden" name="id" value="@room.id" />
+                                <button type="submit" class="btn btn-primary btn-sm w-100" @(room.IsLocked ? "disabled" : "")>
+                                    <i class="fas fa-play"></i> Start Cooling
+                                </button>
+                            </form>
+                        @if (User.IsInRole("Admin"))
+                            {
+                                    <form method="post" asp-controller="Mqtt" asp-action="@(room.IsLocked ? "UnlockRoom" : "LockRoom")" class="w-100">
+                                        <input type="hidden" name="id" value="@room.id" />
+                                        <button type="submit" class="btn btn-@(room.IsLocked ? "success" : "danger") btn-sm w-100">
+                                            <i class="fas fa-@(room.IsLocked ? "unlock" : "lock")"></i> @(room.IsLocked ? "Unlock" : "Lock")
+                                        </button>
+                                    </form>
+                            }
+                        </div>
                     }
-                    @* kapalı *@
-                    @if(room.Status == "0")
+                  
+                    
+@* Çalışıyor *@        @if(room.Status == "1")
+                        {
+                            <div style="--bs-bg-opacity: .3;" class="card-body d-flex flex-column align-items-center text-center bg-success">
+                                    <p class="fw-bold text-secondary">Status: 
+                                        <span id="roomStatus_@room.id" class="badge @(room.Status == "0" ? "bg-danger" : "bg-success")">
+                                            @(room.Status == "0" ? "Closed" : "Working")
+                                        </span>
+                                    </p>
+                                    
+                                    <p class="temperature-display fw-bold" id="roomTemp_@room.id" 
+                                    style="font-size: 1.5rem; color: @(room.Temperature > 30 ? "red" : room.Temperature < 10 ? "blue" : "black")">
+                                        @room.Temperature°C
+                                    </p>
+                                    <!-- Weather Condition -->
+                                    <p class="weather-condition" id="weather_@room.id">
+                                        @{ 
+                                            string weather = "";
+                                            if (room.Temperature >= 50) weather = "🔥 Burning Hot";
+                                            else if (room.Temperature > 30) weather = "☀️ Sunny";
+                                            else if (room.Temperature > 20) weather = "🌤️ Pleasant";
+                                            else if (room.Temperature > 10) weather = "🌥️ Chilly";
+                                            else if (room.Temperature >= 0) weather = "❄️ Snowy";
+                                            else weather = "🧊 Ice Cold";
+                                        }
+                                        <span>@weather</span>
+                                    </p>
+
+                                <!-- Set Temperature Button -->
+                                <form method="post" 
+                                    asp-controller="Mqtt" 
+                                    asp-action="ChangeTempForm" 
+                                    class="mt-2 d-flex justify-content-center align-items-center">
+                                    <div class="input-group">
+                                        <input type="hidden" name="id" value="@room.id" />
+                                        <input type="number" name="Temperature" class="form-control w-50" value="@room.Temperature" />
+                                        <button type="submit" class="btn btn-warning btn-sm" @(room.IsLocked ? "disabled" : "")>
+                                            <i class="fas fa-thermometer-half"></i> Set Temp
+                                        </button>
+                                    </div>
+                                </form>
+                                
+                                <!-- Shutdown Room Button -->
+                                <form method="post" asp-controller="Mqtt" asp-action="ShutdownRoom" class="mt-2 w-100"> 
+                                    <input type="hidden" name="id" value="@room.id" />
+                                    <button type="submit" class="btn btn-danger btn-sm" @(room.IsLocked ? "disabled" : "")>
+                                        <i class="fas fa-power-off"></i> Shutdown
+                                    </button>
+                                </form>
+                            </div>
+                            @if (User.IsInRole("Admin"))
+                                {
+                                    <div class="card-footer">
+                                        <form method="post" asp-controller="Mqtt" asp-action="@(room.IsLocked ? "UnlockRoom" : "LockRoom")" class="w-100">
+                                            <input type="hidden" name="id" value="@room.id" />
+                                            <button type="submit" class="btn btn-@(room.IsLocked ? "success" : "danger") btn-sm w-100">
+                                                <i class="fas fa-@(room.IsLocked ? "unlock" : "lock")"></i> @(room.IsLocked ? "Unlock" : "Lock")
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                        }
+                   
+                    
+
+                  
+@* Kapalı *@             @if(room.Status == "0")
                     {
+                    <div style="--bs-bg-opacity: .3;" class="card-body d-flex flex-column align-items-center text-center bg-dark">
                         <p class="fw-bold text-secondary">Status: 
                             <span id="roomStatus_@room.id" class="badge @(room.Status == "0" ? "bg-danger" : "bg-success")">
                                 @(room.Status == "0" ? "Closed" : "Working")
@@ -125,34 +164,22 @@
                                 <i class="fas fa-play"></i> Start Cooling
                             </button>
                         </form>
+                        </div>
+                        @if (User.IsInRole("Admin"))
+                            {
+                                <div class="card-footer">
+                                    <form method="post" asp-controller="Mqtt" asp-action="@(room.IsLocked ? "UnlockRoom" : "LockRoom")" class="w-100">
+                                        <input type="hidden" name="id" value="@room.id" />
+                                        <button type="submit" class="btn btn-@(room.IsLocked ? "success" : "danger") btn-sm w-100">
+                                            <i class="fas fa-@(room.IsLocked ? "unlock" : "lock")"></i> @(room.IsLocked ? "Unlock" : "Lock")
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                    
                     }
-                </div>
-                @if (room.Status == "Loading...")
-                {
-                    <div class="card-footer">
-                        <form method="post" 
-                              asp-controller="Mqtt" 
-                              asp-action="StartCooling" 
-                              class="w-100">
-                            <input type="hidden" name="id" value="@room.id" />
-                            <button type="submit" class="btn btn-primary btn-sm w-100" @(room.IsLocked ? "disabled" : "")>
-                                <i class="fas fa-play"></i> Start Cooling
-                            </button>
-                        </form>
-                    </div>
-                }
-                @if (User.IsInRole("Admin"))
-                {
-                    <div class="card-footer">
-                        <form method="post" asp-controller="Mqtt" asp-action="@(room.IsLocked ? "UnlockRoom" : "LockRoom")" class="w-100">
-                            <input type="hidden" name="id" value="@room.id" />
-                            <button type="submit" class="btn btn-@(room.IsLocked ? "success" : "danger") btn-sm w-100">
-                                <i class="fas fa-@(room.IsLocked ? "unlock" : "lock")"></i> @(room.IsLocked ? "Unlock" : "Lock")
-                            </button>
-                        </form>
-                    </div>
-                }
             </div>
-        </div>
+    </div>
+       
     }
 </div>

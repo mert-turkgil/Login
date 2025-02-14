@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using Login.ViewModels;
 using Login.Identity;
 using Login.EmailServices;
 using Login.Models;
@@ -29,9 +28,17 @@ public class HomeController : Controller
     [HttpGet]
     public IActionResult Index()
     {
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Account");
+        }
         return View();
     }
-
+    [HttpGet]
+    public IActionResult Privacy()
+    {
+        return View();
+    }
     [HttpGet]
     public IActionResult SignUp()
     {
@@ -140,7 +147,7 @@ public class HomeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(Login.ViewModels.LoginViewModel model)
+    public async Task<IActionResult> Login(LoginViewModel model)
     {
         if (!ModelState.IsValid)
             {
