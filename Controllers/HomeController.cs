@@ -6,6 +6,8 @@ using Login.Identity;
 using Login.EmailServices;
 using Login.Models;
 using Microsoft.AspNetCore.Authorization;
+using Login.Controllers;
+using System.Collections.Concurrent;
 
 
 public class HomeController : Controller
@@ -13,7 +15,7 @@ public class HomeController : Controller
     private readonly IEmailSender _emailSender;
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
-
+    private static readonly ConcurrentDictionary<int, bool> RoomLockStatus = new ConcurrentDictionary<int, bool>();
     private readonly RoleManager<IdentityRole> _roleManager;
 
     public HomeController(IEmailSender emailSender,UserManager<User> userManager, SignInManager<User> signInManager,RoleManager<IdentityRole> roleManager)
@@ -218,7 +220,8 @@ public class HomeController : Controller
                     id = i,
                     RoomName = $"Room {i}",
                     Status = "Loading...",
-                    Temperature = 0
+                    Temperature = 0,
+                    IsLocked = RoomLockStatus.TryGetValue(i, out bool isLocked) && isLocked
                 });
             }
 

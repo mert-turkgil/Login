@@ -12,5 +12,6 @@ namespace Login.Models
         public string RoomName { get; set; }
         public string Status { get; set; }
         public int Temperature { get; set; }
+        public bool IsLocked { get; set; }
     }
 }

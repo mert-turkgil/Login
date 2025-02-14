@@ -45,6 +45,7 @@ C:\Users\mertu\Desktop\publish\Microsoft.IdentityModel.Tokens.dll
 C:\Users\mertu\Desktop\publish\Microsoft.SqlServer.Server.dll
 C:\Users\mertu\Desktop\publish\Microsoft.Win32.SystemEvents.dll
 C:\Users\mertu\Desktop\publish\Mono.TextTemplating.dll
+C:\Users\mertu\Desktop\publish\MQTTnet.dll
 C:\Users\mertu\Desktop\publish\Newtonsoft.Json.dll
 C:\Users\mertu\Desktop\publish\Newtonsoft.Json.Bson.dll
 C:\Users\mertu\Desktop\publish\System.Resources.NetStandard.dll
