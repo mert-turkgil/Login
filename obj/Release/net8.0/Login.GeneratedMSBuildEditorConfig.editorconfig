@@ -9,79 +9,79 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Login
 build_property.RootNamespace = Login
-build_property.ProjectDir = C:\Users\mertu\Desktop\Login\
+build_property.ProjectDir = C:\Users\mertu\Desktop\Mqtt-exmp\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\mertu\Desktop\Login
+build_property.MSBuildProjectDirectory = C:\Users\mertu\Desktop\Mqtt-exmp
 build_property._RazorSourceGeneratorDebug = 
 
-[C:/Users/mertu/Desktop/Login/Views/Home/Account.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Home/Account.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxBY2NvdW50LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Home/ConfirmEmailError.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Home/ConfirmEmailError.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxDb25maXJtRW1haWxFcnJvci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Home/EmailConfirmed.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Home/EmailConfirmed.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxFbWFpbENvbmZpcm1lZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Home/Index.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Home/Privacy.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Home/SignUp.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Home/SignUp.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxTaWduVXAuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Home/SignUpConfirmation.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Home/SignUpConfirmation.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxTaWduVXBDb25maXJtYXRpb24uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Home/UserEdit.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Home/UserEdit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxVc2VyRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Mqtt/Publish.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Mqtt/Publish.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTXF0dFxQdWJsaXNoLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Shared/Components/UserManagement/Default.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Shared/Components/UserManagement/Default.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXENvbXBvbmVudHNcVXNlck1hbmFnZW1lbnRcRGVmYXVsdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Shared/Error.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Shared/_LoginPartial.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Shared/_LoginPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9Mb2dpblBhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Shared/_RoomCards.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Shared/_RoomCards.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9Sb29tQ2FyZHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Shared/_ValidationScriptsPartial.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/_ViewImports.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/_ViewStart.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/mertu/Desktop/Login/Views/Shared/_Layout.cshtml]
+[C:/Users/mertu/Desktop/Mqtt-exmp/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-ry12vzjnvz

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Login.Models
 {
-    public class RoomCardModel
+    public class polRoomCardModel
     {
         #nullable disable
         public int id { get; set; }

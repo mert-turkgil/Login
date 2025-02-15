@@ -5108,11 +5108,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\mertu\\Desktop\\Login\\Login.csproj",
+      "projectUniqueName": "C:\\Users\\mertu\\Desktop\\Mqtt-exmp\\Login.csproj",
       "projectName": "Login",
-      "projectPath": "C:\\Users\\mertu\\Desktop\\Login\\Login.csproj",
+      "projectPath": "C:\\Users\\mertu\\Desktop\\Mqtt-exmp\\Login.csproj",
       "packagesPath": "C:\\Users\\mertu\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\mertu\\Desktop\\Login\\obj\\",
+      "outputPath": "C:\\Users\\mertu\\Desktop\\Mqtt-exmp\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

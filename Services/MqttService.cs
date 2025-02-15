@@ -12,6 +12,8 @@ using MQTTnet.Client.Options;
 using MQTTnet.Protocol;
 using Login.Services;
 using Login.Hubs;
+using Login.Models;
+using System.Text.RegularExpressions;
 
 namespace Login.Services
 {
@@ -47,53 +49,107 @@ namespace Login.Services
             ConfigureMqttClient();
         }
 
-        private void ConfigureMqttClient()
+private void ConfigureMqttClient()
+{
+    // Set up the connected handler.
+    _mqttClient.UseConnectedHandler(async e =>
+    {
+        _logger.LogInformation("Connected to MQTT broker.");
+
+        // Subscribe to topics for room numbers 1 to 12.
+        for (int room = 1; room <= 12; room++)
         {
-            // Set up the connected handler.
-            _mqttClient.UseConnectedHandler(async e =>
-            {
-                _logger.LogInformation("Connected to MQTT broker.");
+            string statusTopic = $"ciceklisogukhavadeposu/control_room/room{room}/status";
+            string tempTopic = $"ciceklisogukhavadeposu/control_room/room{room}/temp";
 
-                // Subscribe to topics for room numbers 1 to 12.
-                for (int room = 1; room <= 12; room++)
-                {
-                    string statusTopic = $"ciceklisogukhavadeposu/control_room/room{room}/status";
-                    string tempTopic = $"ciceklisogukhavadeposu/control_room/room{room}/temp";
+            // Use the simple SubscribeAsync overload (topic, QoS)
+            await _mqttClient.SubscribeAsync(statusTopic, MqttQualityOfServiceLevel.AtLeastOnce);
+            await _mqttClient.SubscribeAsync(tempTopic, MqttQualityOfServiceLevel.AtLeastOnce);
 
-                    // Use the simple SubscribeAsync overload (topic, QoS)
-                    await _mqttClient.SubscribeAsync(statusTopic, MqttQualityOfServiceLevel.AtLeastOnce);
-                    await _mqttClient.SubscribeAsync(tempTopic, MqttQualityOfServiceLevel.AtLeastOnce);
-
-                    _logger.LogInformation($"Subscribed to: {statusTopic} and {tempTopic}");
-                }
-            });
-
-            // Set up the disconnected handler.
-            _mqttClient.UseDisconnectedHandler(async e =>
-            {
-                _logger.LogWarning("Disconnected from MQTT broker. Attempting reconnect...");
-                await Task.Delay(TimeSpan.FromSeconds(5));
-                await ConnectAsync(CancellationToken.None);
-            });
-
-            // Set up the message received handler.
-            _mqttClient.UseApplicationMessageReceivedHandler(async e =>
-            {
-                try
-                {
-                    var topic = e.ApplicationMessage.Topic;
-                    var payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-                    _logger.LogInformation($"Message received on topic {topic}: {payload}");
-
-                    // Broadcast the message to all SignalR clients.
-                    await _hubContext.Clients.All.SendAsync("ReceiveNotification", topic, payload);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error processing MQTT message");
-                }
-            });
+            _logger.LogInformation($"Subscribed to: {statusTopic} and {tempTopic}");
         }
+    });
+
+    // Set up the disconnected handler.
+    _mqttClient.UseDisconnectedHandler(async e =>
+    {
+        _logger.LogWarning("Disconnected from MQTT broker. Attempting reconnect...");
+        await Task.Delay(TimeSpan.FromSeconds(5));
+        await ConnectAsync(CancellationToken.None);
+    });
+
+    // Set up the message received handler.
+    _mqttClient.UseApplicationMessageReceivedHandler(async e =>
+    {
+        try
+        {
+            var topic = e.ApplicationMessage.Topic;
+            var payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+            _logger.LogInformation($"Message received on topic {topic}: {payload}");
+
+
+            // Update LiveDataStore based on the topic type.
+            if (topic.Contains("/temp"))
+            {
+                // Example topic: ciceklisogukhavadeposu/control_room/room4/temp
+                var match = Regex.Match(topic, @"room(\d+)/temp");
+                if (match.Success && int.TryParse(match.Groups[1].Value, out int roomId))
+                {
+                    if (int.TryParse(payload, out int temp))
+                    {
+                        // Update LivePolRoomData (polRoomCardModel)
+                        LiveDataStore.LivePolRoomData.AddOrUpdate(roomId,
+                            new polRoomCardModel
+                            {
+                                id = roomId,
+                                RoomName = $"Room {roomId}",
+                                Temperature = temp,
+                                // Preserve previous status from LiveRoomData if available; otherwise default to "0".
+                                Status = LiveDataStore.LivePolRoomData.TryGetValue(roomId, out var ex) ? ex.Status : "0",
+                                IsLocked = false
+                            },
+                            (key, existing) =>
+                            {
+                                existing.Temperature = temp;
+                                return existing;
+                            });
+                    }
+                }
+            }
+            else if (topic.Contains("/status"))
+            {
+                // Example topic: ciceklisogukhavadeposu/control_room/room3/status
+                var match = Regex.Match(topic, @"room(\d+)/status");
+                if (match.Success && int.TryParse(match.Groups[1].Value, out int roomId))
+                {
+                    // Update LivePolRoomData (polRoomCardModel)
+                    LiveDataStore.LivePolRoomData.AddOrUpdate(roomId,
+                        new polRoomCardModel
+                        {
+                            id = roomId,
+                            RoomName = $"Room {roomId}",
+                            Status = payload,
+                            Temperature = LiveDataStore.LivePolRoomData.TryGetValue(roomId, out var ex) ? ex.Temperature : 0,
+                            IsLocked = false
+                        },
+                        (key, existing) =>
+                        {
+                            existing.Status = payload;
+                            return existing;
+                        });
+                }
+            }
+
+            // Broadcast the message to all SignalR clients.
+            await _hubContext.Clients.All.SendAsync("ReceiveNotification", topic, payload);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing MQTT message");
+        }
+    });
+}
+
 
         public async Task ConnectAsync(CancellationToken cancellationToken = default)
         {

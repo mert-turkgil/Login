@@ -3,73 +3,7 @@
 @inject UserManager<User> _userManager
 @model Login.Models.UserViewModel
 
-@section Scripts{ 
-<!-- Include the SignalR client library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
-<script>
-    // Establish the SignalR connection
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/notificationHub") // Ensure this matches your hub endpoint
-        .build();
-
-    // Start the connection
-    connection.start()
-        .then(() => {
-            console.log("Connected to NotificationHub.");
-        })
-        .catch(err => console.error("Error connecting to NotificationHub: ", err));
-
-    // Listen for room update notifications
-    connection.on("ReceiveNotification", function (roomUpdate) {
-        // roomUpdate should be an object with: id, RoomName, Status, Temperature, IsLocked
-        const roomId = roomUpdate.id;
-
-        // Update the status badge (assumes IDs like "roomStatus_1", "roomStatus_2", etc.)
-        const statusElem = document.getElementById("roomStatus_" + roomId);
-        if (statusElem) {
-            // Assume "0" means Closed; otherwise, Working
-            statusElem.innerText = roomUpdate.Status === "0" ? "Closed" : "Working";
-            statusElem.className = "badge " + (roomUpdate.Status === "0" ? "bg-danger" : "bg-success");
-        }
-
-        // Update the temperature display (assumes IDs like "roomTemp_1", "roomTemp_2", etc.)
-        const tempElem = document.getElementById("roomTemp_" + roomId);
-        if (tempElem) {
-            tempElem.innerText = roomUpdate.Temperature + "°C";
-            // Change text color based on the temperature value
-            tempElem.style.color = roomUpdate.Temperature > 30 ? "red" :
-                                     roomUpdate.Temperature < 10 ? "blue" : "black";
-        }
-
-        // Update the weather condition (assumes IDs like "weather_1", "weather_2", etc.)
-        const weatherElem = document.getElementById("weather_" + roomId);
-        if (weatherElem) {
-            let weather = "";
-            const temp = roomUpdate.Temperature;
-            if (temp >= 50) weather = "🔥 Burning Hot";
-            else if (temp > 30) weather = "☀️ Sunny";
-            else if (temp > 20) weather = "🌤️ Pleasant";
-            else if (temp > 10) weather = "🌥️ Chilly";
-            else if (temp >= 0) weather = "❄️ Snowy";
-            else weather = "🧊 Ice Cold";
-            weatherElem.innerText = weather;
-        }
-
-        // Disable or enable all buttons within the room card based on the IsLocked value.
-        // Make sure each room card container has an id like "roomCard_1", "roomCard_2", etc.
-        const cardContainer = document.getElementById("roomCard_" + roomId);
-        if (cardContainer) {
-            // Find all button elements within the card container.
-            const buttons = cardContainer.querySelectorAll("button");
-            buttons.forEach(btn => {
-                btn.disabled = roomUpdate.IsLocked;
-            });
-        }
-    });
-</script>
-
-}
 
 <div class="container mt-5">
     <div class="card shadow">
@@ -165,16 +99,29 @@
         </section>
     }
 
-    <!-- Partial View for Room Cards -->
+    <!-- Polling-based Real-Time Room Data -->
     <div class="card shadow mt-4">
         <div class="card-header bg-primary text-white">
             <h3 class="card-title mb-0"><i class="fas fa-tv"></i> Real-Time Room Data</h3>
         </div>
-        <div class="card-body">
-           <partial name="_RoomCards" model="Model.RoomCards" />
+        <div class="card-body" id="polRoomCardsContainer">
+            <partial name="_polRoomCards" model="Model.RoomCards" />
         </div>
     </div>
 
 </div>
 
 
+@section Scripts{
+<script>
+    // Poll every 1 second (1000 milliseconds) for updated polling data.
+    setInterval(function () {
+        fetch('/Home/RefreshPolRoomCards')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('polRoomCardsContainer').innerHTML = html;
+            })
+            .catch(error => console.error("Error refreshing polling partial:", error));
+    }, 1000);
+</script>
+}

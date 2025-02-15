@@ -7,6 +7,7 @@ using Login.Models;
 using Microsoft.AspNetCore.Authorization;
 using Login.Controllers;
 using System.Collections.Concurrent;
+using Login.Services;
 
 
 public class HomeController : Controller
@@ -206,7 +207,7 @@ public class HomeController : Controller
                 return RedirectToAction("Index");
             }
 
-            // Convert to UserViewModel
+            // Build the view model (UserViewModel) with 12 room cards
             var userViewModel = new UserViewModel
             {
                 Id = user.Id,
@@ -216,24 +217,52 @@ public class HomeController : Controller
                 CreatedDate = user.CreatedDate,
                 UserName = user.UserName,
                 User = user,
-                RoomCards = new List<RoomCardModel>()
+                RoomCards = new List<polRoomCardModel>()
             };
-
-            // Create a list of 12 room cards
-            for (int i = 1; i <= 12; i++)
-            {
-                userViewModel.RoomCards.Add(new RoomCardModel
-                {
-                    id = i,
-                    RoomName = $"Room {i}",
-                    Status = "Loading...",
-                    Temperature = 0,
-                    IsLocked = RoomLockStatus.TryGetValue(i, out bool isLocked) && isLocked
-                });
-            }
 
             return View(userViewModel);
         }
+
+        [HttpGet]
+        public IActionResult RefreshPolRoomCards()
+        {
+            var polRooms = new List<polRoomCardModel>();
+            for (int i = 1; i <= 12; i++)
+            {
+                if (LiveDataStore.LivePolRoomData.TryGetValue(i, out var roomCard))
+                {
+                    polRooms.Add(new polRoomCardModel
+                    {
+                        id = roomCard.id,
+                        RoomName = roomCard.RoomName,
+                        Status = roomCard.Status,
+                        Temperature = roomCard.Temperature,
+                        IsLocked = roomCard.IsLocked
+                    });
+                }
+                else
+                {
+                    for (int a = 1; a <= 12; a++){
+                    // If no data yet, show "Loading..."
+                        polRooms.Add(new polRoomCardModel
+                        {
+                            id = a,
+                            RoomName = $"Room {a}",
+                            Status = "Loading...",
+                            Temperature = 0,
+                            IsLocked = false
+                        });
+                    }
+
+                }
+            }
+
+            return PartialView("_polRoomCards", polRooms);
+        }
+
+
+
+
 
 
 

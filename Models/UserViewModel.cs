@@ -19,6 +19,6 @@ namespace Login.Models
 
         public DateTime CreatedDate { get; set; }
 
-        public List<RoomCardModel> RoomCards { get; set; }= new List<RoomCardModel>();
+        public List<polRoomCardModel> RoomCards { get; set; }= new List<polRoomCardModel>();
     }
 }

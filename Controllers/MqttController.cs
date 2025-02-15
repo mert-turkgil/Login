@@ -30,10 +30,10 @@ namespace Login.Controllers
         [HttpGet("Publish")]
         public IActionResult Publish()
         {
-            var rooms = new List<RoomCardModel>();
+            var rooms = new List<polRoomCardModel>();
             for (int i = 1; i <= 12; i++)
             {
-                rooms.Add(new RoomCardModel
+                rooms.Add(new polRoomCardModel
                 {
                     id = i,
                     RoomName = $"Room {i}",
@@ -69,7 +69,7 @@ namespace Login.Controllers
                 await _mqttService.PublishAsync(topicTemp, "0");
 
                 // Broadcast update for each room (shutdown: status "0", temperature 0)
-                var roomUpdate = new RoomCardModel
+                var roomUpdate = new polRoomCardModel
                 {
                     id = i,
                     RoomName = $"Room {i}",
@@ -102,7 +102,7 @@ namespace Login.Controllers
                 RoomLockStatus[i] = true;
 
                 // Broadcast update: locked (status "0", temperature 0)
-                var roomUpdate = new RoomCardModel
+                var roomUpdate = new polRoomCardModel
                 {
                     id = i,
                     RoomName = $"Room {i}",
@@ -131,7 +131,7 @@ namespace Login.Controllers
                 RoomLockStatus[i] = false;
 
                 // Broadcast update: unlocked (status "1" indicating working; temperature 0 by default)
-                var roomUpdate = new RoomCardModel
+                var roomUpdate = new polRoomCardModel
                 {
                     id = i,
                     RoomName = $"Room {i}",
@@ -164,7 +164,7 @@ namespace Login.Controllers
 
             RoomLockStatus[id] = true;
 
-            var roomUpdate = new RoomCardModel
+            var roomUpdate = new polRoomCardModel
             {
                 id = id,
                 RoomName = $"Room {id}",
@@ -194,7 +194,7 @@ namespace Login.Controllers
 
             RoomLockStatus[id] = false;
 
-            var roomUpdate = new RoomCardModel
+            var roomUpdate = new polRoomCardModel
             {
                 id = id,
                 RoomName = $"Room {id}",
@@ -207,10 +207,11 @@ namespace Login.Controllers
             TempData["SuccessMessage"] = $"Room {id} is now unlocked.";
             return RedirectToAction("Account", "Home");
         }
+        #region User change temp and start cooling
 
         [HttpPost("ChangeTemp")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangeTemp([FromBody] RoomCardModel model)
+        public async Task<IActionResult> ChangeTemp([FromBody] polRoomCardModel model)
         {
             if (model == null || model.id < 1 || model.id > 12)
                 return BadRequest("Invalid room ID.");
@@ -218,10 +219,11 @@ namespace Login.Controllers
             if (RoomLockStatus.TryGetValue(model.id, out bool isLocked) && isLocked)
                 return BadRequest("Room is locked and cannot be controlled.");
 
-            string topic = $"{_configuration["MQTT:BaseTopic"]}room{model.id}/temp";
+            // Use the new topic for setting temperature
+            string topic = $"set_temp/room{model.id}/control_room/ciceklisogukhavadeposu";
             await _mqttService.PublishAsync(topic, model.Temperature.ToString());
 
-            var roomUpdate = new RoomCardModel
+            var roomUpdate = new polRoomCardModel
             {
                 id = model.id,
                 RoomName = $"Room {model.id}",
@@ -234,6 +236,7 @@ namespace Login.Controllers
             return Ok(new { message = "Temperature update published" });
         }
 
+
         [HttpPost("StartCooling")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> StartCooling(int id)
@@ -244,17 +247,16 @@ namespace Login.Controllers
             if (RoomLockStatus.TryGetValue(id, out bool isLocked) && isLocked)
                 return BadRequest("Room is locked and cannot be controlled.");
 
-            string topicStatus = $"{_configuration["MQTT:BaseTopic"]}room{id}/status";
-            string topicTemp = $"{_configuration["MQTT:BaseTopic"]}room{id}/temp";
-            await _mqttService.PublishAsync(topicTemp, "1");
-            await _mqttService.PublishAsync(topicStatus, "1");
+            // Use the new topic for power request; sending "1" means turning on
+            string topic = $"pwr_rqst/room{id}/control_room/ciceklisogukhavadeposu";
+            await _mqttService.PublishAsync(topic, "1");
 
-            var roomUpdate = new RoomCardModel
+            var roomUpdate = new polRoomCardModel
             {
                 id = id,
                 RoomName = $"Room {id}",
-                Status = "1",
-                Temperature = 1,
+                Status = "1", // "1" indicates the room is working/on
+                Temperature = 1, // You may update this to a more appropriate value if needed
                 IsLocked = false
             };
             await _hubContext.Clients.All.SendAsync("ReceiveNotification", roomUpdate);
@@ -263,32 +265,8 @@ namespace Login.Controllers
             return RedirectToAction("Account", "Home");
         }
 
-        [HttpPost("ChangeTempForm")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangeTempForm([FromForm] RoomCardModel model)
-        {
-            if (model == null || model.id < 1 || model.id > 12)
-            {
-                TempData["ErrorMessage"] = "Invalid room ID.";
-                return RedirectToAction("Account", "Home");
-            }
 
-            string topic = $"{_configuration["MQTT:BaseTopic"]}room{model.id}/temp";
-            await _mqttService.PublishAsync(topic, model.Temperature.ToString());
-
-            var roomUpdate = new RoomCardModel
-            {
-                id = model.id,
-                RoomName = $"Room {model.id}",
-                Status = model.Status,
-                Temperature = model.Temperature,
-                IsLocked = RoomLockStatus.TryGetValue(model.id, out bool locked) && locked
-            };
-            await _hubContext.Clients.All.SendAsync("ReceiveNotification", roomUpdate);
-
-            TempData["SuccessMessage"] = $"Temperature update published: {model.Temperature}°C for Room {model.id}.";
-            return RedirectToAction("Account", "Home");
-        }
+        #endregion
 
         [HttpPost("ShutdownRoom")]
         [ValidateAntiForgeryToken]
@@ -300,10 +278,10 @@ namespace Login.Controllers
                 return RedirectToAction("Account", "Home");
             }
             int shutdownValue = 0;
-            string topicStatus = $"{_configuration["MQTT:BaseTopic"]}room{id}/status";
+            string topicStatus = $"pwr_rqst/{_configuration["MQTT:BaseTopic"]}room{id}";
             await _mqttService.PublishAsync(topicStatus, shutdownValue.ToString());
 
-            var roomUpdate = new RoomCardModel
+            var roomUpdate = new polRoomCardModel
             {
                 id = id,
                 RoomName = $"Room {id}",
@@ -311,6 +289,8 @@ namespace Login.Controllers
                 Temperature = 0,
                 IsLocked = RoomLockStatus.TryGetValue(id, out bool locked) && locked
             };
+            string topic = $"pwr_rqst/room{id}/control_room/ciceklisogukhavadeposu";
+            await _mqttService.PublishAsync(topic, "0");
             await _hubContext.Clients.All.SendAsync("ReceiveNotification", roomUpdate);
 
             TempData["SuccessMessage"] = $"Shutdown command published for Room {id}.";
